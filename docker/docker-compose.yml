@@ -1,0 +1,59 @@
+version: "3"
+
+services:
+
+  # ------> mysql ------>
+  mysql:
+    container_name: mysql
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    volumes:
+      - ../volumes/mysql:/var/lib/mysql
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_DATABASE: mycollectiondb
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_USER: develop
+      MYSQL_PASSWORD: mydev
+  # <------ mysql <------ 
+  
+  # ------> mailhog ------>
+  mailhog:
+    container_name: mailhog
+    image: mailhog/mailhog
+    restart: 'on-failure'
+    ports:
+      - 1025:1025
+      - 8025:8025
+  # <------ mailhog <------
+
+  # ------> adminer ------>
+  adminer:
+    container_name: adminer
+    image: adminer
+    restart: 'on-failure'
+    environment:
+      ADMINER_PLUGINS: tables-filter tinymce table-structure
+      ADMINER_DESIGN: pepa-linha
+    ports:
+      - 8080:8080
+  # <------ adminer <------
+
+  # ------> symfony ------>
+  symfony:
+    container_name: symfony
+    build: ./symfony
+    image: mycollection/symfony
+    restart: 'on-failure'
+    working_dir: /app
+    ports:
+      - 80:80
+    volumes:
+      - ../:/app
+      - ../vendor:/app/vendor
+      - ./symfony/conf/apache2:/etc/apache2:cached
+      - ./symfony/conf/php7/php.ini:/etc/php7/php.ini:cached
+  # <------ symfony <------
+  
